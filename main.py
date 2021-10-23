@@ -24,7 +24,7 @@ def get_possible_steps(x, y):
     return possible_steps
 
 
-def lets_tour(x, y, counter, board_size, chess_board):
+def lets_tour_with_heuristic(x, y, counter, board_size, chess_board):
 
     chess_board[x][y] = counter
     if counter == board_size ** 2:
@@ -36,7 +36,7 @@ def lets_tour(x, y, counter, board_size, chess_board):
             if len(get_possible_steps(i[0], i[1])) <= len(get_possible_steps(actual_step[0], actual_step[1])):
                 actual_step = i
         counter += 1
-        if lets_tour(actual_step[0], actual_step[1], counter, board_size, chess_board):
+        if lets_tour_with_heuristic(actual_step[0], actual_step[1], counter, board_size, chess_board):
             return True
         else:
             counter -= 1
@@ -48,9 +48,28 @@ def lets_tour(x, y, counter, board_size, chess_board):
         chess_board[x][y] = 0
         return False
 
+def lets_tour_without_heuristic(x, y, counter, board_size, chess_board):
 
+    chess_board[x][y] = counter
+    if counter == board_size ** 2:
+        return True
+    options = get_possible_steps(x, y)
+    if options:
+        for i in options:
+            counter += 1
+            if lets_tour_without_heuristic(i[0], i[1], counter, board_size, chess_board):
+                return True
+            else:
+                counter -= 1
 
-board_size = 8
+    if counter == 1:
+        chess_board[x][y] = 1
+        return False
+    else:
+        chess_board[x][y] = 0
+        return False
+
+board_size = 7
 
 chess_board = []
 counter = 1
@@ -61,11 +80,25 @@ y = random.randrange(board_size)
 declare(x, y)
 
 start = time.time()
-lets_tour(x, y, counter, board_size, chess_board)
+lets_tour_with_heuristic(x, y, counter, board_size, chess_board)
+end = time.time()
+for i in range(board_size):
+    for j in range(board_size):
+        print("{0:>3}".format(chess_board[i][j]), end=" ")
+    print()
+print("Potrebny cas s heuristikou: " + str((end-start)*1000)+"ms")
+
+"""
+chess_board = []
+counter = 1
+declare(x, y)
+start = time.time()
+lets_tour_without_heuristic(x, y, counter, board_size, chess_board)
 end = time.time()
 
 for i in range(board_size):
     for j in range(board_size):
         print("{0:>3}".format(chess_board[i][j]), end=" ")
     print()
-print("Potrebny cas: " + str(float((end-start)/1000))+"ms")
+print("Potrebny cas bez heuristiky: " + str((end-start)*1000)+"ms")
+"""
